@@ -16,6 +16,10 @@ public class Ticket {
         longDesc = descriptionLong;
     }
 
+    public Ticket(){
+
+    }
+
     public String getEmployeeID() {
         return employeeID;
     }

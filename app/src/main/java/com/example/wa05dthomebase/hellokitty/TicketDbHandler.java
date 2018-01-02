@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.example.wa05dthomebase.hellokitty.TicketContract.DATABASE_NAME;
 
 /**
@@ -75,5 +78,60 @@ public class TicketDbHandler extends SQLiteOpenHelper{
         return cursor;
     }
 
-    
+    public List<Ticket> GetAllTickets(){
+        List<Ticket> ticketList = new ArrayList<Ticket>();
+
+        String selectQuery = "SELECT * FROM " + TicketContract.TicketEntry.TABLE_NAME;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Ticket ticket = new Ticket();
+                ticket.setId(Integer.parseInt(cursor.getString(0)));
+                ticket.setEmployeeID(cursor.getString(1));
+                ticket.setShortDesc(cursor.getString(2));
+                ticket.setLongDesc(cursor.getString(3));
+
+                ticketList.add(ticket);
+            } while (cursor.moveToNext());
+        }
+
+        return ticketList;
+    }
+
+    public int updateTicket(Ticket ticket){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(TicketContract.TicketEntry.COLUMN_EID, ticket.getEmployeeID());
+        values.put(TicketContract.TicketEntry.COLUMN_SHORT, ticket.getShortDesc());
+        values.put(TicketContract.TicketEntry.COLUMN_LONG, ticket.getLongDesc());
+
+        return db.update(TicketContract.TicketEntry.TABLE_NAME, values,
+                TicketContract.TicketEntry.COLUMN_PRODUCT_ID + " = ?",
+                new String[]{String.valueOf(ticket.getId())});
+    }
+
+    //Deleting a Ticket
+    public void deleteTicket(Ticket ticket){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TicketContract.TicketEntry.TABLE_NAME, TicketContract.TicketEntry.COLUMN_PRODUCT_ID + " = ?", new String[]{String.valueOf(ticket.getId())});
+
+        db.close();
+    }
+
+    //Delete all tickets
+    public void deleteAll(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TicketContract.TicketEntry.TABLE_NAME, null, null);
+        db.execSQL(" delete from " + TicketContract.TicketEntry.TABLE_NAME);
+        db.close();
+    }
+
+    //Detele the database file
+    public void deleteDatabase(){
+        mContext.deleteDatabase(DATABASE_NAME);
+    }
+
 }
